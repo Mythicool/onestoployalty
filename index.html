@@ -21,6 +21,9 @@
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
 
+    <!-- Netlify Identity Widget -->
+    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <!-- Favicon (using emoji as data URI) -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
@@ -516,8 +519,12 @@
     <!-- Confetti Container -->
     <div class="confetti-container" id="confetti" aria-hidden="true"></div>
 
+    <!-- Netlify Identity Modal Container -->
+    <div id="netlify-modal"></div>
+
     <!-- Scripts -->
     <script src="script.js"></script>
+    <script src="loyalty-auth.js"></script>
 </body>
 
 </html>

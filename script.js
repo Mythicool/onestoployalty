@@ -325,6 +325,12 @@ function checkSession() {
 }
 
 function isLoggedIn() {
+    // Check Netlify Identity first
+    if (typeof netlifyIdentity !== 'undefined') {
+        const netlifyUser = netlifyIdentity.currentUser();
+        if (netlifyUser) return true;
+    }
+    // Fallback to local user
     return currentUser !== null;
 }
 
@@ -467,6 +473,13 @@ function showLanding() {
 }
 
 function showLogin() {
+    // Prefer Netlify Identity if available
+    if (typeof netlifyIdentity !== 'undefined') {
+        netlifyIdentity.open('login');
+        return;
+    }
+
+    // Fallback to local login screen
     showScreen('login-screen');
     // Focus email input after animation
     setTimeout(() => {
@@ -476,6 +489,13 @@ function showLogin() {
 }
 
 function showSignup() {
+    // Prefer Netlify Identity if available
+    if (typeof netlifyIdentity !== 'undefined') {
+        netlifyIdentity.open('signup');
+        return;
+    }
+
+    // Fallback to local signup screen
     showScreen('signup-screen');
     // Focus first input after animation
     setTimeout(() => {
@@ -502,8 +522,21 @@ function showOpening() {
     // Determine reward before opening
     earnedReward = determineReward();
     earnedReward.code = generatePromoCode(earnedReward.codePrefix);
-    earnedReward.memberId = currentUser.memberId;
-    earnedReward.memberName = currentUser.name;
+
+    // Get user info from Netlify or local
+    if (typeof netlifyIdentity !== 'undefined' && netlifyIdentity.currentUser()) {
+        const netlifyUser = netlifyIdentity.currentUser();
+        earnedReward.memberId = netlifyUser.user_metadata?.member_id || generateMemberId();
+        earnedReward.memberName = netlifyUser.user_metadata?.full_name ||
+            netlifyUser.user_metadata?.name ||
+            netlifyUser.email?.split('@')[0] || 'Trainer';
+    } else if (currentUser) {
+        earnedReward.memberId = currentUser.memberId;
+        earnedReward.memberName = currentUser.name;
+    } else {
+        earnedReward.memberId = generateMemberId();
+        earnedReward.memberName = 'Trainer';
+    }
 
     showScreen('opening-screen');
     resetPackState();
@@ -515,7 +548,16 @@ function showReveal() {
 
     // Save reward to user's history
     if (isLoggedIn() && earnedReward) {
-        addRewardToHistory(earnedReward);
+        // Check if using Netlify Identity
+        if (typeof netlifyIdentity !== 'undefined' && netlifyIdentity.currentUser()) {
+            // Save to Netlify (async)
+            if (typeof addRewardToNetlify === 'function') {
+                addRewardToNetlify(earnedReward);
+            }
+        } else {
+            // Save to local storage
+            addRewardToHistory(earnedReward);
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 [build]
   publish = "."
   command = "echo 'No build required - static site'"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -8,6 +9,11 @@
 # Form processing
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
+
+# Identity settings
+[identity]
+  # Enable registration
+  registration_preferences = "open"
 
 # Headers for security
 [[headers]]
@@ -17,3 +23,15 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Redirect for SPA-style routing within onestopanime folder
+[[redirects]]
+  from = "/onestopanime/*"
+  to = "/onestopanime/:splat"
+  status = 200
+
+# API redirect for identity
+[[redirects]]
+  from = "/.netlify/identity/*"
+  to = "/.netlify/identity/:splat"
+  status = 200
